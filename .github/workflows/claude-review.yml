@@ -1,0 +1,32 @@
+name: Claude PR Review
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            Review this pull request. Focus on:
+            - Logic errors and bugs
+            - Security issues (SQL injection, secrets exposure, unsafe file handling)
+            - Correctness of database operations and schema migrations
+            - Edge cases and missing error handling at system boundaries
+
+            Skip formatting and style — those are handled by linters.
+            Post findings as inline review comments where possible.
+          claude_args: "--max-turns 30"
